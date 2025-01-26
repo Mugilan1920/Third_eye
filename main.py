@@ -1,3 +1,4 @@
+#Importing Libraries
 import numpy as np
 import argparse
 import pickle
@@ -9,25 +10,32 @@ from collections import deque
 
 #'http://192.168.1.8:8080'
 
+#Function Definition
 def print_results(video, limit=None):
     # fig=plt.figure(figsize=(16, 30))
+    #Setting Up Output Directory
     if not os.path.exists('output'):
         os.mkdir('output')
-
+        
+    #Loading the Model
     print("Loading model ...")
-    model = load_model("D:\\pragatheeshwar\\rotaract\\modelnew.h5")
+    model = load_model("C:\\mugilan\\rotaract\\modelnew.h5")
+    
+    #Initializing Video Stream and Variables
     Q = deque(maxlen=128)
     vs = cv2.VideoCapture('http://192.168.43.1:8080/video')
     writer = None
     (W, H) = (None, None)
     count = 0
     flag = 1
+    #Processing Frames
     while True:
         # read the next frame from the file
         (grabbed, frame) = vs.read()
 
         # if the frame was not grabbed, then we have reached the end
         # of the stream
+        #End of Video Stream
         if not grabbed:
             break
 
@@ -38,7 +46,8 @@ def print_results(video, limit=None):
         # clone the output frame, then convert it from BGR to RGB
         # ordering, resize the frame to a fixed 128x128, and then
         # perform mean subtraction
-
+        
+        #Prepare the Frame for Prediction
         output = frame.copy()
         dummy = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -58,20 +67,24 @@ def print_results(video, limit=None):
         print(i)
         label = i
         text_color = (0, 255, 0)  # default : green
-
+        
+        #Violence Detection Logic
         if label:  # Violence prob
             print("violence detected")
             gray = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
 
             # read the haarcascade to detect the faces in an image
+            #Face Detection
             face_cascade = cv2.CascadeClassifier('C:\\mugilan\\rotaract\haarcascade_frontalface_default.xml')
 
             # detects faces in the input image
+            #Face Detection
             faces = face_cascade.detectMultiScale(gray, 1.3, 4)
             # print('Number of detected faces:', len(faces))
 
             # loop over all detected faces
             if len(faces) > 0:
+            #Draw Rectangles Around Detected Faces
                 for i, (x, y, w, h) in enumerate(faces):
                     # To draw a rectangle in a face
                     cv2.rectangle(output, (x, y), (x + w, y + h), (0, 255, 255), 2)
@@ -81,12 +94,13 @@ def print_results(video, limit=None):
 
 
 
-
+        #If No Violence Detected
         else:
             print("No violence")
             cv2.imwrite("C:\\mugilan\\rotaract\image_output\\image.png",output)
 
         # check if the video writer is None
+        #Write Processed Frames
         if writer is None:
             # initialize our video writer
             fourcc = cv2.VideoWriter_fourcc(*"MJPG")
@@ -96,6 +110,7 @@ def print_results(video, limit=None):
         writer.write(output)
 
         # show the output image
+        #Display Output Frame
         cv2.imshow("frame",output)
         key = cv2.waitKey(1) & 0xFF
 
@@ -104,9 +119,10 @@ def print_results(video, limit=None):
             break
     # release the file pointersq
     #print("[INFO] cleaning up...")
+    #Release Resources
     writer.release()
     vs.release()
-
+    #Run the Function
 V_path = "C:\\mugilan\\rotaract\\Testing videos\\V_19.mp4"
 NV_path = "/nonv.mp4"
 print_results(V_path)
